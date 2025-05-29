@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <title>🕹️ Dangerous Tracks</title>
+  <meta charset=utf-8 />
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <div id="cover">
+
+    <header class="cover-header">
+      Dangerous Tracks
+    </header>
+
+    <div class="cover-content">
+      <h1>Dangerous Tracks</h1>
+      <p>Explora un mundo misterioso lleno de desafíos. ¿Podrás superar todos
+        los obstáculos?</p>
+      <button id="coverBtn">INSTRUCCIONES</button>
+    </div>
+
+    <footer class="cover-footer">
+      © 2025. Todos los derechos reservados | Quetzali Vite
+    </footer>
+
+  </div>
+
+  <div id="gameOverMessage">
+    <h2>¡Game Over!</h2>
+    <p>Tu puntuación fue: <span id="scoreDisplay">0</span></p>
+    <button id="retryButton">Reintentar</button>
+  </div>
+
+  <div id="instructions" class="instructions">
+    <h2>🕹️ Instrucciones del Juego</h2>
+    <ul>
+      <li><span class="key">A</span> <span class="key">D</span> — Mover al personaje</li>
+      <li><span class="key">ESPACIO</span> — Saltar</li>
+      <li>❌ Evita obstáculos y enemigos</li>
+      <li>🎮 Presiona <strong>Iniciar Juego</strong> para comenzar</li>
+    </ul>
+  </div>
+
+  <div class="controls">
+    <button id="startBtn" class="game-btn start">Iniciar Juego</button>
+    <button id="pauseBtn" class="game-btn pause" disabled>Pausar</button>
+    <button id="restartBtn" class="game-btn restart">Reiniciar</button>
+  </div>
+
+  <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+  <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.150.1/examples/jsm/"
+        }
+      }
+    </script>
+
+  <script type="module">
+    document.getElementById('coverBtn').addEventListener('click', function () {
+      document.getElementById('cover').style.display = 'none';
+      document.getElementById('instructions').style.display = 'block';
+    });
+
+    document.getElementById('startBtn').addEventListener('click', function () {
+      document.getElementById('instructions').style.display = 'none';
+    });
+  </script>
+
+  <script type="module" src="js/main.js"></script>
+
+</body>
+</html>

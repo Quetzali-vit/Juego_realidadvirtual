@@ -1,0 +1,11 @@
+Model Information:
+* title:	Danger Barrier (Proops)
+* source:	https://sketchfab.com/3d-models/danger-barrier-proops-1591b810c8554fc08342e7486364d8fa
+* author:	ALTEREGO (v.a.c.u.u.m.) (https://sketchfab.com/v.a.c.u.u.m.)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Danger Barrier (Proops)" (https://sketchfab.com/3d-models/danger-barrier-proops-1591b810c8554fc08342e7486364d8fa) by ALTEREGO (v.a.c.u.u.m.) (https://sketchfab.com/v.a.c.u.u.m.) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

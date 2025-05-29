@@ -1,0 +1,339 @@
+body, html {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000;
+  font-family: Arial, sans-serif;
+}
+
+/* ---------------------------- */
+/* PORTADA (HEADER + CONTENIDO + FOOTER) */
+/* ---------------------------- */
+#cover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('portada.png');
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  color: rgb(255, 255, 255);
+  text-align: center;
+  background-size: cover;
+  /* Cubre todo el espacio */
+  background-position: center;
+  /* Centra la imagen */
+  background-repeat: no-repeat;
+  /* Evite repetición */
+}
+
+/* HEADER */
+.cover-header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 20px 0;
+  background: linear-gradient(90deg, #0000006d);
+  color: rgb(255, 255, 255);
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  z-index: 2001;
+}
+
+/* CONTENIDO CENTRAL (ajustado para no solapar header/footer) */
+.cover-content {
+  margin: 120px 0 100px;
+  padding: 0 20px;
+  max-width: 800px;
+}
+
+#cover h1 {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px rgb(0, 0, 0);
+}
+
+#cover p {
+  font-size: 1.2rem;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+#coverBtn {
+  padding: 15px 50px;
+  font-size: 1.2rem;
+  background: linear-gradient(145deg, #4c4c4cb8, #000000);
+  border: none;
+  border-radius: 40px;
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgb(75, 75, 75);
+}
+
+#coverBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* FOOTER */
+.cover-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 15px 0;
+  background: linear-gradient(90deg, #000000c7);
+  color: #ffffff;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.cover-footer::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+}
+
+/* ---------------------------- */
+/* INSTRUCCIONES */
+/* ---------------------------- */
+#instructions {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(145deg, rgba(94, 94, 94, 0.67) 0%, rgba(43, 43, 43, 0.308) 100%);
+  border-radius: 16px;
+  padding: 25px;
+  width: 85%;
+  max-width: 450px;
+  color: #ffffff;
+  font-family: 'Rajdhani', 'Arial', sans-serif;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  animation: pulse-glow 6s infinite alternate;
+}
+
+#instructions h2 {
+  margin-top: 0;
+  color: rgb(255, 255, 255);
+  text-align: center;
+  font-size: clamp(1.4em, 5vw, 1.8em);
+  margin-bottom: 50px;
+  text-shadow: 0 0 10px rgb(0, 0, 0);
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+#instructions ul {
+  padding-left: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+#instructions li {
+  margin-bottom: 15px;
+  line-height: 1.6;
+  font-size: clamp(1.1em, 3.5vw, 1.2em);
+  position: relative;
+  padding-left: 30px;
+}
+
+#instructions li:before {
+  content: "•";
+  color: rgb(255, 255, 255);
+  font-size: 1.5em;
+  position: absolute;
+  left: 5px;
+  top: -3px;
+  text-shadow: 0 0 8px rgb(255, 255, 255);
+}
+
+.key {
+  display: inline-block;
+  background: linear-gradient(to bottom, #000000 0%, rgb(20, 20, 20) 100%);
+  color: rgb(255, 255, 255);
+  padding: 3px 10px;
+  margin: 0 4px;
+  border-radius: 5px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  box-shadow: 0 3px 0 #000000,
+    inset 0 0 5px rgb(253, 253, 253);
+  border: 1px solid rgb(59, 46, 42);
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.747);
+  transform: translateY(-1px);
+}
+
+#instructions strong {
+  color: rgb(0, 254, 21);
+  font-weight: bold;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.414);
+}
+
+/* Efecto de tecla ESPACIO especial */
+.key[style*="ESPACIO"] {
+  padding: 3px 15px;
+}
+
+/* Animación de pulso */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0px 25px rgba(108, 108, 108, 0.537),
+      0 0 0 2px rgba(82, 82, 82, 0.492),
+      0 0 30px rgba(123, 123, 123, 0.611);
+  }
+
+  100% {
+    box-shadow: 0 10px 35px rgba(105, 105, 105, 0.7),
+      0 0 0 3px rgba(0, 0, 0, 0.4),
+      0 0 40px rgba(118, 118, 118, 0.422);
+  }
+}
+
+/* Fondo futurista (opcional - añade esto al body o contenedor principal) */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(100, 100, 255, 0.1) 0%, transparent 30%),
+    radial-gradient(circle at 80% 70%, rgba(255, 100, 255, 0.1) 0%, transparent 30%),
+    linear-gradient(135deg, #0a0a20 0%, #1a1a30 100%);
+  z-index: -1;
+}
+
+/* ---------------------------- */
+/* CONTROLES (SOLO VISIBLES EN INSTRUCCIONES/JUEGO) */
+/* ---------------------------- */
+#cover+.controls {
+  display: none;
+  /* Oculta en portada */
+}
+
+.controls {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 25px;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  background: rgba(26, 26, 46, 0.7);
+  padding: 15px 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid #6c63ff;
+}
+
+.game-btn {
+  padding: 15px 35px;
+  border: none;
+  border-radius: 40px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #fff;
+  background: linear-gradient(145deg, #6c63ff, #3f3d9f);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.game-btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+}
+
+.start {
+  background: linear-gradient(145deg, #00c853, #009624);
+}
+
+.pause {
+  background: linear-gradient(145deg, #ffeb3b, #fbc02d);
+  color: #333;
+}
+
+.restart {
+  background: linear-gradient(145deg, #f44336, #c62828);
+}
+
+/* Estilo cuando el botón está DESACTIVADO (gris) */
+.game-btn:disabled {
+  background: linear-gradient(145deg, #aaaaaa, #888888);
+  color: #dddddd;
+  cursor: not-allowed;
+}
+
+.game-btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow:
+    0 12px 20px rgba(0, 0, 0, 0.923),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.game-btn:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.2),
+    inset 0 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* ---------------------------- */
+/* GAME OVER */
+/* ---------------------------- */
+#gameOverMessage {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.758);
+  color: rgb(255, 255, 255);
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  display: none;
+  z-index: 1000;
+  box-shadow: 0 0 50px rgb(0, 0, 0);
+}
+
+#retryButton {
+  background: linear-gradient(145deg, #76000059, #6a0000);
+  border: none;
+  color: rgb(255, 255, 255);
+  padding: 12px 25px;
+  margin-top: 20px;
+  border-radius: 40px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* ---------------------------- */
+/* ANIMACIONES */
+/* ---------------------------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
