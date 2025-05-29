@@ -15,9 +15,8 @@ const scene = new THREE.Scene();
 const cameraGroup = new THREE.Group();
 scene.add(cameraGroup);
 
-// ➕ Añade estos ajustes para VR (posición inicial)
-cameraGroup.position.y = 10;   // Altura inicial en VR (ajusta según necesites)
-cameraGroup.position.z = -5;   // Distancia desde el jugador en VR
+cameraGroup.position.y = 50;   // Altura inicial en VR (ajusta según necesites)
+cameraGroup.position.z = -1;   // Distancia desde el jugador en VR
 
 const camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 150, 260);
