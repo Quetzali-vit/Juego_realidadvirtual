@@ -5,21 +5,24 @@ import { AudioLoader, AudioListener, Audio } from 'three';
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
-// Variables de control del juego
 let gameRunning = false;
 let gamePaused = false;
 let gameStartTime = 0;
 
-// Escena, cámara y renderer
+const controllerState = {
+  left: { x: 0, z: 0 },
+  right: { x: 0, z: 0 }
+};
+
 const scene = new THREE.Scene();
 const cameraGroup = new THREE.Group();
 scene.add(cameraGroup);
 
-cameraGroup.position.y = 50;   // Altura inicial en VR (ajusta según necesites)
-cameraGroup.position.z = -1;   // Distancia desde el jugador en VR
+cameraGroup.position.y = 50;
+cameraGroup.position.z = -1;
 
 const camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 150, 260);
+camera.position.set(0, 150, 100);
 cameraGroup.add(camera);
 
 const modelPaths = {
@@ -35,31 +38,35 @@ const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 renderer.shadowMap.enabled = true;
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.xr.enabled = true; // Habilita XR
+renderer.xr.enabled = true;
 document.body.appendChild(renderer.domElement);
-document.body.appendChild(VRButton.createButton(renderer)); // Añade botón VR
+document.body.appendChild(VRButton.createButton(renderer));
 
-// Sistema de audio
+renderer.xr.addEventListener('sessionstart', () => {
+  cameraGroup.position.y = 1.8; 
+  console.log('VR started - Camera height adjusted');
+});
+
+renderer.xr.addEventListener('sessionend', () => {
+  cameraGroup.position.y = 50;
+  console.log('VR ended - Camera reset');
+});
+
 const listener = new AudioListener();
 camera.add(listener);
 const audioLoader = new AudioLoader();
 const backgroundMusic = new Audio(listener);
 
-// Cargar música de fondo
 audioLoader.load('js/musica.mp3', (buffer) => {
   backgroundMusic.setBuffer(buffer);
   backgroundMusic.setLoop(true);
   backgroundMusic.setVolume(0.5);
 });
 
-// Grupo para la pista
 const trackGroup = new THREE.Group();
 scene.add(trackGroup);
-
-// Loaders y animaciones
 const fbxLoader = new FBXLoader();
 const gltfLoader = new GLTFLoader();
-
 let mixer;
 const animationsMap = {};
 let currentAction;
@@ -86,7 +93,6 @@ function loadAnimation(name, path) {
   });
 }
 
-// Clase Box (colisionador)
 class Box extends THREE.Mesh {
   constructor({ width, height, depth, color = '#00ff00',
     velocity = { x: 0, y: 0, z: 0 },
@@ -102,7 +108,6 @@ class Box extends THREE.Mesh {
     this.height = height;
     this.depth = depth;
     this.position.set(position.x, position.y, position.z);
-
     this.velocity = velocity;
     this.gravity = -0.25;
     this.zAcceleration = zAcceleration;
@@ -139,15 +144,12 @@ class Box extends THREE.Mesh {
     }
   }
 }
-
 function boxCollision({ box1, box2 }) {
   const xCollision = box1.right >= box2.left && box1.left <= box2.right;
   const yCollision = box1.bottom + box1.velocity.y <= box2.top && box1.top >= box2.bottom;
   const zCollision = box1.front >= box2.back && box1.back <= box2.front;
-
   return xCollision && yCollision && zCollision;
 }
-
 const cube = new Box({
   width: 20,
   height: 25,
@@ -242,14 +244,11 @@ function createTracks() {
         }
       });
     }
-
     trackGroup.userData.movePlanks = movePlanks;
   });
 }
-
 createTracks();
 
-// Luces
 const light = new THREE.DirectionalLight(0xffffff, 0.5);
 light.position.set(0, 3, 1);
 light.castShadow = true;
@@ -262,7 +261,6 @@ backLight.castShadow = true;
 scene.add(backLight);
 
 let playerModel;
-
 fbxLoader.load(animationFiles['Alto'], (fbx) => {
   playerModel = fbx;
   playerModel.scale.set(0.5, 0.5, -0.5);
@@ -306,33 +304,43 @@ fbxLoader.load(animationFiles['Alto'], (fbx) => {
   mixer.update(0);
 });
 
-// Configuración de controles VR
 const controllerModelFactory = new XRControllerModelFactory();
-
 let controller1, controller2;
 
 function setupXRControllers() {
   controller1 = renderer.xr.getController(0);
   controller1.addEventListener('selectstart', onSelectStart);
   controller1.addEventListener('selectend', onSelectEnd);
+  controller1.addEventListener('squeezestart', () => keys.w.pressed = true);
+  controller1.addEventListener('squeezeend', () => keys.w.pressed = false);
+  controller1.addEventListener('move', (event) => {
+    if (event.controller === controller1) {
+      controllerState.left.x = event.gamepad.axes[2] || 0;
+      controllerState.left.z = event.gamepad.axes[3] || 0;
+    }
+  });
   cameraGroup.add(controller1);
 
   controller2 = renderer.xr.getController(1);
   controller2.addEventListener('selectstart', onSelectStart);
   controller2.addEventListener('selectend', onSelectEnd);
+  controller2.addEventListener('squeezestart', () => keys.w.pressed = true);
+  controller2.addEventListener('squeezeend', () => keys.w.pressed = false);
+  controller2.addEventListener('move', (event) => {
+    if (event.controller === controller2) {
+      controllerState.right.x = event.gamepad.axes[2] || 0;
+      controllerState.right.z = event.gamepad.axes[3] || 0;
+    }
+  });
   cameraGroup.add(controller2);
 
-  // Modelos de los controles
   const controllerGrip1 = renderer.xr.getControllerGrip(0);
   const controllerGrip2 = renderer.xr.getControllerGrip(1);
-  
   controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
   controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
-  
   cameraGroup.add(controllerGrip1);
   cameraGroup.add(controllerGrip2);
 }
-
 function onSelectStart() {
   if (gameRunning && !gamePaused && cube.canJump) {
     cube.velocity.y = 6;
@@ -340,12 +348,9 @@ function onSelectStart() {
     playAnimation('Saltar');
   }
 }
-
 function onSelectEnd() {
-  // Lógica cuando se suelta el gatillo VR
 }
 
-// Inicializar controles VR
 setupXRControllers();
 
 const keys = {
@@ -353,14 +358,18 @@ const keys = {
   d: { pressed: false },
   w: { pressed: false }
 };
-
 window.addEventListener('keydown', (event) => {
   if (!gameRunning || gamePaused) return;
 
   switch (event.code) {
-    case 'KeyA': keys.a.pressed = true; break;
-    case 'KeyD': keys.d.pressed = true; break;
+    case 'KeyA': 
+      keys.a.pressed = true; 
+      break;
+    case 'KeyD': 
+      keys.d.pressed = true; 
+      break;
     case 'Space':
+      event.preventDefault();  
       if (cube.canJump) {
         cube.velocity.y = 6;
         cube.canJump = false;
@@ -372,8 +381,15 @@ window.addEventListener('keydown', (event) => {
 
 window.addEventListener('keyup', (event) => {
   switch (event.code) {
-    case 'KeyA': keys.a.pressed = false; break;
-    case 'KeyD': keys.d.pressed = false; break;
+    case 'KeyA': 
+      keys.a.pressed = false; 
+      break;
+    case 'KeyD': 
+      keys.d.pressed = false; 
+      break;
+    case 'Space':
+      event.preventDefault(); 
+      break;
   }
 });
 
@@ -392,7 +408,6 @@ function playAnimation(name) {
     currentAction = toPlay;
   }
 }
-
 const enemies = [];
 let frames = 0;
 let spawnRate = 150;
@@ -410,7 +425,6 @@ function startGame() {
     animate();
   }
 }
-
 function togglePause() {
   if (gameRunning) {
     if (gamePaused) {
@@ -424,10 +438,8 @@ function togglePause() {
     }
   }
 }
-
 function restartGame() {
-  renderer.setAnimationLoop(null); // Detiene el bucle de animación XR
-
+  renderer.setAnimationLoop(null);
   cube.position.set(0, 12.5, 50);
   cube.velocity = { x: 0, y: -0.01, z: 0 };
 
@@ -462,8 +474,6 @@ function restartGame() {
   backgroundMusic.stop();
   startGame();
 }
-
-// Event listeners
 document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('pauseBtn').addEventListener('click', togglePause);
 document.getElementById('restartBtn').addEventListener('click', restartGame);
@@ -476,7 +486,6 @@ document.querySelectorAll('#startBtn, #pauseBtn, #restartBtn, #retryButton').for
     }
   });
 });
-
 const clock = new THREE.Clock();
 
 function animate() {
@@ -485,7 +494,7 @@ function animate() {
 
     const delta = Math.min(clock.getDelta(), 0.05);
     const elapsedTime = (performance.now() - gameStartTime) / 1000;
-    
+
     if (cube) {
       backLight.position.set(
         cube.position.x,
@@ -508,57 +517,76 @@ function animate() {
     cube.velocity.x = 0;
     cube.velocity.z = 0;
 
-    if (elapsedTime >= 1) {
-      if (cube.canJump) {
-        if (keys.a.pressed) {
-          cube.velocity.x = -2;
-        } else if (keys.d.pressed) {
-          cube.velocity.x = 2;
-        } else {
-          cube.velocity.x = 0;
-        }
+// Reemplaza esta sección en tu función animate()
+if (elapsedTime >= 1) {
+  // Movimiento con joysticks VR (prioridad) o teclado
+  const joystickThreshold = 0.1; // Reducido para mayor sensibilidad
+  
+  // Combinar inputs de ambos joysticks
+  let moveX = 0;
+  
+  // Joystick izquierdo
+  if (Math.abs(controllerState.left.x) > joystickThreshold) {
+    moveX = controllerState.left.x * 3;
+  } 
+  // Joystick derecho (solo si el izquierdo no está activo)
+  else if (Math.abs(controllerState.right.x) > joystickThreshold) {
+    moveX = controllerState.right.x * 3;
+  }
+  // Teclado (solo si no hay input de joystick)
+  else {
+    if (keys.a.pressed) moveX = -2;
+    if (keys.d.pressed) moveX = 2;
+  }
+  
+  cube.velocity.x = moveX;
 
-        if (keys.w.pressed) {
-          cube.velocity.x *= 0.5;
-          playAnimation('Arrastre');
-        }
-        else if (keys.a.pressed) {
-          playAnimation('Izquierdo');
-        } else if (keys.d.pressed) {
-          playAnimation('Derecho');
-        } else {
-          playAnimation('Adelante');
-        }
-      } else {
-        if (cube.velocity.y > 0) {
-          playAnimation('Saltar');
-        } else {
-          playAnimation('Caer');
-        }
-
-        if (keys.a.pressed) cube.velocity.x = -2;
-        else if (keys.d.pressed) cube.velocity.x = 2;
-      }
-    } else {
-      playAnimation('Alto');
-      cube.velocity.x = 0;
-      cube.velocity.z = 0;
+  // Animaciones
+  if (cube.canJump) {
+    if (keys.w.pressed) {
+      playAnimation('Arrastre');
     }
-
+    else if (cube.velocity.x < -0.1) {
+      playAnimation('Izquierdo');
+    } else if (cube.velocity.x > 0.1) {
+      playAnimation('Derecho');
+    } else {
+      playAnimation('Adelante');
+    }
+  } else {
+    if (cube.velocity.y > 0) {
+      playAnimation('Saltar');
+    } else {
+      playAnimation('Caer');
+    }
+  }
+}
     const limitX = (ground.width / 2) - (cube.width / 2) - 15;
     cube.position.x = Math.max(-limitX, Math.min(limitX, cube.position.x));
     cube.update(ground);
 
-    if (playerModel) {
-      playerModel.position.lerp(cube.position, 0.3);
+    if (!renderer.xr.isPresenting) { 
+      camera.position.x = cube.position.x;               
+      camera.position.z = cube.position.z + 300;          
+      camera.lookAt(cube.position.x, cube.position.y + 100, cube.position.z);  
     }
 
-    // Actualización de la cámara para VR
-    if (!renderer.xr.isPresenting) {
-      camera.position.x = cube.position.x;
-      camera.position.z = cube.position.z + 200;
-      camera.lookAt(cube.position.x, cube.position.y + 100, cube.position.z);
+    if (playerModel) {
+      playerModel.position.lerp(cube.position, 0.3);
+
+      // Ajusta la posición de la cámara en modo VR para estar frente al personaje
+      if (renderer.xr.isPresenting) {
+        const offsetZ = 200; // Distancia frente al personaje
+        const offsetY = 100; // Altura de la cámara
+        cameraGroup.position.x = cube.position.x;
+        cameraGroup.position.z = cube.position.z + offsetZ;
+        cameraGroup.position.y = cube.position.y + offsetY;
+
+        // Hacer que la cámara mire al personaje
+        camera.lookAt(cube.position.x, cube.position.y + 10, cube.position.z);
+      }
     }
+
 
     if (elapsedTime >= 1) {
       enemies.forEach((collider, index) => {
@@ -649,14 +677,12 @@ function animate() {
       }
     }
     frames++;
-    
     renderer.render(scene, camera);
   });
 }
 
-// Manejo de redimensionamiento
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-});
+});  
