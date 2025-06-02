@@ -26,11 +26,8 @@ body, html {
   color: rgb(255, 255, 255);
   text-align: center;
   background-size: cover;
-  /* Cubre todo el espacio */
   background-position: center;
-  /* Centra la imagen */
   background-repeat: no-repeat;
-  /* Evite repetición */
 }
 
 /* HEADER */
@@ -47,7 +44,7 @@ body, html {
   z-index: 2001;
 }
 
-/* CONTENIDO CENTRAL (ajustado para no solapar header/footer) */
+/* CONTENIDO CENTRAL */
 .cover-content {
   margin: 120px 0 100px;
   padding: 0 20px;
@@ -95,15 +92,6 @@ body, html {
   font-size: 1rem;
 }
 
-.cover-footer::before {
-  content: "";
-  position: absolute;
-  top: -1px;
-  left: 0;
-  width: 100%;
-  height: 1px;
-}
-
 /* ---------------------------- */
 /* INSTRUCCIONES */
 /* ---------------------------- */
@@ -124,127 +112,32 @@ body, html {
   animation: pulse-glow 6s infinite alternate;
 }
 
-#instructions h2 {
-  margin-top: 0;
-  color: rgb(255, 255, 255);
-  text-align: center;
-  font-size: clamp(1.4em, 5vw, 1.8em);
-  margin-bottom: 50px;
-  text-shadow: 0 0 10px rgb(0, 0, 0);
-  letter-spacing: 1px;
-  font-weight: 700;
-}
-
-#instructions ul {
-  padding-left: 0;
-  margin: 0;
-  list-style-type: none;
-}
-
-#instructions li {
-  margin-bottom: 15px;
-  line-height: 1.6;
-  font-size: clamp(1.1em, 3.5vw, 1.2em);
-  position: relative;
-  padding-left: 30px;
-}
-
-#instructions li:before {
-  content: "•";
-  color: rgb(255, 255, 255);
-  font-size: 1.5em;
-  position: absolute;
-  left: 5px;
-  top: -3px;
-  text-shadow: 0 0 8px rgb(255, 255, 255);
-}
-
-.key {
-  display: inline-block;
-  background: linear-gradient(to bottom, #000000 0%, rgb(20, 20, 20) 100%);
-  color: rgb(255, 255, 255);
-  padding: 3px 10px;
-  margin: 0 4px;
-  border-radius: 5px;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
-  box-shadow: 0 3px 0 #000000,
-    inset 0 0 5px rgb(253, 253, 253);
-  border: 1px solid rgb(59, 46, 42);
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.747);
-  transform: translateY(-1px);
-}
-
-#instructions strong {
-  color: rgb(0, 254, 21);
-  font-weight: bold;
-  text-shadow: 0 0 8px rgba(0, 0, 0, 0.414);
-}
-
-/* Efecto de tecla ESPACIO especial */
-.key[style*="ESPACIO"] {
-  padding: 3px 15px;
-}
-
-/* Animación de pulso */
-@keyframes pulse-glow {
-  0% {
-    box-shadow: 0 0px 25px rgba(108, 108, 108, 0.537),
-      0 0 0 2px rgba(82, 82, 82, 0.492),
-      0 0 30px rgba(123, 123, 123, 0.611);
-  }
-
-  100% {
-    box-shadow: 0 10px 35px rgba(105, 105, 105, 0.7),
-      0 0 0 3px rgba(0, 0, 0, 0.4),
-      0 0 40px rgba(118, 118, 118, 0.422);
-  }
-}
-
-/* Fondo futurista (opcional - añade esto al body o contenedor principal) */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(100, 100, 255, 0.1) 0%, transparent 30%),
-    radial-gradient(circle at 80% 70%, rgba(255, 100, 255, 0.1) 0%, transparent 30%),
-    linear-gradient(135deg, #0a0a20 0%, #1a1a30 100%);
-  z-index: -1;
-}
-
 /* ---------------------------- */
-/* CONTROLES (SOLO VISIBLES EN INSTRUCCIONES/JUEGO) */
+/* CONTROLES SUPERIORES */
 /* ---------------------------- */
-#cover+.controls {
-  display: none;
-  /* Oculta en portada */
-}
-
 .controls {
   position: fixed;
-  bottom: 30px;
+  top: 20px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 25px;
+  gap: 15px;
   z-index: 100;
   backdrop-filter: blur(10px);
   background: rgba(26, 26, 46, 0.7);
-  padding: 15px 25px;
+  padding: 12px 20px;
   border-radius: 20px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   border: 1px solid #6c63ff;
+  max-width: 95%;
+  overflow-x: auto;
 }
 
 .game-btn {
-  padding: 15px 35px;
+  padding: 12px 25px;
   border: none;
   border-radius: 40px;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -273,25 +166,10 @@ body::before {
   background: linear-gradient(145deg, #f44336, #c62828);
 }
 
-/* Estilo cuando el botón está DESACTIVADO (gris) */
 .game-btn:disabled {
   background: linear-gradient(145deg, #aaaaaa, #888888);
   color: #dddddd;
   cursor: not-allowed;
-}
-
-.game-btn:hover {
-  transform: translateY(-4px) scale(1.05);
-  box-shadow:
-    0 12px 20px rgba(0, 0, 0, 0.923),
-    inset 0 2px 4px rgba(255, 255, 255, 0.3);
-}
-
-.game-btn:active {
-  transform: translateY(2px) scale(0.98);
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.2),
-    inset 0 3px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* ---------------------------- */
@@ -324,16 +202,69 @@ body::before {
 }
 
 /* ---------------------------- */
-/* ANIMACIONES */
+/* ANIMACIONES Y MEDIA QUERIES */
 /* ---------------------------- */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0px 25px rgba(108, 108, 108, 0.537),
+      0 0 0 2px rgba(82, 82, 82, 0.492),
+      0 0 30px rgba(123, 123, 123, 0.611);
+  }
+  100% {
+    box-shadow: 0 10px 35px rgba(105, 105, 105, 0.7),
+      0 0 0 3px rgba(0, 0, 0, 0.4),
+      0 0 40px rgba(118, 118, 118, 0.422);
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(-10px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* RESPONSIVE PARA PANTALLAS PEQUEÑAS */
+@media (max-width: 768px) {
+  .controls {
+    top: 15px;
+    padding: 10px 15px;
+    gap: 10px;
+  }
+  
+  .game-btn {
+    padding: 10px 18px;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+  
+  #cover h1 {
+    font-size: 2.5rem;
+  }
+  
+  #cover p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .controls {
+    top: 10px;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  
+  .game-btn {
+    padding: 8px 15px;
+    font-size: 13px;
+  }
+  
+  #coverBtn {
+    padding: 12px 40px;
+    font-size: 1rem;
   }
 }

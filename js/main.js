@@ -40,17 +40,6 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.xr.enabled = true;
 document.body.appendChild(renderer.domElement);
-document.body.appendChild(VRButton.createButton(renderer));
-
-renderer.xr.addEventListener('sessionstart', () => {
-  cameraGroup.position.y = 1.8; 
-  console.log('VR started - Camera height adjusted');
-});
-
-renderer.xr.addEventListener('sessionend', () => {
-  cameraGroup.position.y = 50;
-  console.log('VR ended - Camera reset');
-});
 
 const listener = new AudioListener();
 camera.add(listener);
@@ -308,11 +297,22 @@ const controllerModelFactory = new XRControllerModelFactory();
 let controller1, controller2;
 
 function setupXRControllers() {
+
+  if (controller1) cameraGroup.remove(controller1);
+  if (controller2) cameraGroup.remove(controller2);
+
   controller1 = renderer.xr.getController(0);
-  controller1.addEventListener('selectstart', onSelectStart);
-  controller1.addEventListener('selectend', onSelectEnd);
-  controller1.addEventListener('squeezestart', () => keys.w.pressed = true);
-  controller1.addEventListener('squeezeend', () => keys.w.pressed = false);
+  // Gatillo izquierdo para mover a la izquierda
+  controller1.addEventListener('selectstart', () => keys.a.pressed = true);
+  controller1.addEventListener('selectend', () => keys.a.pressed = false);
+  // Botón de apretar (squeeze) para saltar
+  controller1.addEventListener('squeezestart', () => {
+    if (cube.canJump) {
+      cube.velocity.y = 6;
+      cube.canJump = false;
+      playAnimation('Saltar');
+    }
+  });
   controller1.addEventListener('move', (event) => {
     if (event.controller === controller1) {
       controllerState.left.x = event.gamepad.axes[2] || 0;
@@ -322,10 +322,9 @@ function setupXRControllers() {
   cameraGroup.add(controller1);
 
   controller2 = renderer.xr.getController(1);
-  controller2.addEventListener('selectstart', onSelectStart);
-  controller2.addEventListener('selectend', onSelectEnd);
-  controller2.addEventListener('squeezestart', () => keys.w.pressed = true);
-  controller2.addEventListener('squeezeend', () => keys.w.pressed = false);
+  // Gatillo derecho para mover a la derecha
+  controller2.addEventListener('selectstart', () => keys.d.pressed = true);
+  controller2.addEventListener('selectend', () => keys.d.pressed = false);
   controller2.addEventListener('move', (event) => {
     if (event.controller === controller2) {
       controllerState.right.x = event.gamepad.axes[2] || 0;
@@ -341,15 +340,6 @@ function setupXRControllers() {
   cameraGroup.add(controllerGrip1);
   cameraGroup.add(controllerGrip2);
 }
-function onSelectStart() {
-  if (gameRunning && !gamePaused && cube.canJump) {
-    cube.velocity.y = 6;
-    cube.canJump = false;
-    playAnimation('Saltar');
-  }
-}
-function onSelectEnd() {
-}
 
 setupXRControllers();
 
@@ -362,14 +352,14 @@ window.addEventListener('keydown', (event) => {
   if (!gameRunning || gamePaused) return;
 
   switch (event.code) {
-    case 'KeyA': 
-      keys.a.pressed = true; 
+    case 'KeyA':
+      keys.a.pressed = true;
       break;
-    case 'KeyD': 
-      keys.d.pressed = true; 
+    case 'KeyD':
+      keys.d.pressed = true;
       break;
     case 'Space':
-      event.preventDefault();  
+      event.preventDefault();
       if (cube.canJump) {
         cube.velocity.y = 6;
         cube.canJump = false;
@@ -381,14 +371,14 @@ window.addEventListener('keydown', (event) => {
 
 window.addEventListener('keyup', (event) => {
   switch (event.code) {
-    case 'KeyA': 
-      keys.a.pressed = false; 
+    case 'KeyA':
+      keys.a.pressed = false;
       break;
-    case 'KeyD': 
-      keys.d.pressed = false; 
+    case 'KeyD':
+      keys.d.pressed = false;
       break;
     case 'Space':
-      event.preventDefault(); 
+      event.preventDefault();
       break;
   }
 });
@@ -422,6 +412,12 @@ function startGame() {
     document.getElementById('pauseBtn').disabled = false;
     backgroundMusic.play();
     playAnimation('Alto');
+
+    // Crear el botón VR solo cuando el juego comienza
+    const vrButton = VRButton.createButton(renderer);
+    vrButton.id = 'vr-button'; // Asignar un ID para poder eliminarlo luego
+    document.body.appendChild(vrButton);
+
     animate();
   }
 }
@@ -438,42 +434,57 @@ function togglePause() {
     }
   }
 }
+
 function restartGame() {
+  if (renderer.xr.isPresenting) {
+    renderer.xr.getSession().end();
+  }
   renderer.setAnimationLoop(null);
-  cube.position.set(0, 12.5, 50);
+
+  // Reiniciar posición del cubo exactamente como en la inicialización
+  cube.position.set(0, 12.5, 100); // Asegúrate que es la misma Z inicial
   cube.velocity = { x: 0, y: -0.01, z: 0 };
 
+  // Reiniciar cámara y grupo de cámara
+  cameraGroup.position.set(0, 50, -1);
+  camera.position.set(0, 150, 100);
+  camera.lookAt(0, 0, 0);
+
+  // Limpiar enemigos
   enemies.forEach(enemy => {
-    if (enemy.userData.model) {
-      scene.remove(enemy.userData.model);
-    }
+    if (enemy.userData.model) scene.remove(enemy.userData.model);
     scene.remove(enemy);
   });
   enemies.length = 0;
 
+  // Reiniciar pista
+  setupXRControllers();
   trackGroup.position.z = 0;
   trackSpeed = 10;
 
+  // Reiniciar modelo del jugador
   if (playerModel) {
     playerModel.position.copy(cube.position);
     playerModel.position.y += 0.5;
     playAnimation('Alto');
   }
 
+  // Reiniciar otros estados
   frames = 0;
-  spawnRate = 200;
+  spawnRate = 150; // Asegúrate que es el mismo valor inicial
+  gameRunning = false;
+  gamePaused = false;
 
+  // UI
   document.getElementById("gameOverMessage").style.display = "none";
   document.getElementById("startBtn").disabled = false;
   document.getElementById("pauseBtn").disabled = true;
   document.getElementById("pauseBtn").textContent = 'Pausar';
 
-  gameRunning = false;
-  gamePaused = false;
-
   backgroundMusic.stop();
   startGame();
 }
+
 document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('pauseBtn').addEventListener('click', togglePause);
 document.getElementById('restartBtn').addEventListener('click', restartGame);
@@ -489,7 +500,7 @@ document.querySelectorAll('#startBtn, #pauseBtn, #restartBtn, #retryButton').for
 const clock = new THREE.Clock();
 
 function animate() {
-  renderer.setAnimationLoop(function() {
+  renderer.setAnimationLoop(function () {
     if (gamePaused) return;
 
     const delta = Math.min(clock.getDelta(), 0.05);
@@ -517,58 +528,50 @@ function animate() {
     cube.velocity.x = 0;
     cube.velocity.z = 0;
 
-// Reemplaza esta sección en tu función animate()
-if (elapsedTime >= 1) {
-  // Movimiento con joysticks VR (prioridad) o teclado
-  const joystickThreshold = 0.1; // Reducido para mayor sensibilidad
-  
-  // Combinar inputs de ambos joysticks
-  let moveX = 0;
-  
-  // Joystick izquierdo
-  if (Math.abs(controllerState.left.x) > joystickThreshold) {
-    moveX = controllerState.left.x * 3;
-  } 
-  // Joystick derecho (solo si el izquierdo no está activo)
-  else if (Math.abs(controllerState.right.x) > joystickThreshold) {
-    moveX = controllerState.right.x * 3;
-  }
-  // Teclado (solo si no hay input de joystick)
-  else {
-    if (keys.a.pressed) moveX = -2;
-    if (keys.d.pressed) moveX = 2;
-  }
-  
-  cube.velocity.x = moveX;
+    if (elapsedTime >= 1) {
+      const joystickThreshold = 0.1;
 
-  // Animaciones
-  if (cube.canJump) {
-    if (keys.w.pressed) {
-      playAnimation('Arrastre');
+      // Prioridad a los joysticks
+      if (Math.abs(controllerState.left.x) > joystickThreshold) {
+        cube.velocity.x = controllerState.left.x * 3;
+      }
+      else if (Math.abs(controllerState.right.x) > joystickThreshold) {
+        cube.velocity.x = controllerState.right.x * 3;
+      }
+      // Luego a los gatillos/teclado
+      else {
+        if (keys.a.pressed) cube.velocity.x = -2; // Izquierda
+        if (keys.d.pressed) cube.velocity.x = 2;  // Derecha
+      }
+
+      // Animaciones
+      if (cube.canJump) {
+        if (keys.w.pressed) {
+          playAnimation('Arrastre');
+        }
+        else if (cube.velocity.x < -0.1) {
+          playAnimation('Izquierdo');
+        } else if (cube.velocity.x > 0.1) {
+          playAnimation('Derecho');
+        } else {
+          playAnimation('Adelante');
+        }
+      } else {
+        if (cube.velocity.y > 0) {
+          playAnimation('Saltar');
+        } else {
+          playAnimation('Caer');
+        }
+      }
     }
-    else if (cube.velocity.x < -0.1) {
-      playAnimation('Izquierdo');
-    } else if (cube.velocity.x > 0.1) {
-      playAnimation('Derecho');
-    } else {
-      playAnimation('Adelante');
-    }
-  } else {
-    if (cube.velocity.y > 0) {
-      playAnimation('Saltar');
-    } else {
-      playAnimation('Caer');
-    }
-  }
-}
     const limitX = (ground.width / 2) - (cube.width / 2) - 15;
     cube.position.x = Math.max(-limitX, Math.min(limitX, cube.position.x));
     cube.update(ground);
 
-    if (!renderer.xr.isPresenting) { 
-      camera.position.x = cube.position.x;               
-      camera.position.z = cube.position.z + 300;          
-      camera.lookAt(cube.position.x, cube.position.y + 100, cube.position.z);  
+    if (!renderer.xr.isPresenting) {
+      camera.position.x = cube.position.x;
+      camera.position.z = cube.position.z + 300;
+      camera.lookAt(cube.position.x, cube.position.y + 100, cube.position.z);
     }
 
     if (playerModel) {
@@ -599,6 +602,10 @@ if (elapsedTime >= 1) {
         }
 
         if (boxCollision({ box1: cube, box2: collider })) {
+          if (renderer.xr.isPresenting) {
+            renderer.xr.getSession().end(); // Sale del modo VR
+          }
+
           document.getElementById("gameOverMessage").style.display = "block";
           document.getElementById("scoreDisplay").textContent = frames;
           gameRunning = false;
@@ -685,4 +692,4 @@ window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-});  
+});
